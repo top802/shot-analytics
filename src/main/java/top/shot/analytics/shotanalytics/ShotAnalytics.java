@@ -14,6 +14,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import top.shot.analytics.shotanalytics.jpa_manager.DatabaseConnection;
@@ -21,7 +22,7 @@ import top.shot.analytics.shotanalytics.model_dto.ShellingCard;
 
 public class ShotAnalytics extends Application {
 
-  Button saveButton;
+  Button saveButton, updateButton, deleteButton;
   Label showInfo, strafing, numbersCannonades,
         startStrafing, endStrafing, positionLabel,
         weaponTypeLabel;
@@ -105,6 +106,10 @@ public class ShotAnalytics extends Application {
     showInfo = new Label();
     saveButton = new Button();
     saveButton.setText("Зберегти");
+    updateButton = new Button();
+    updateButton.setText("Оновити");
+    deleteButton = new Button();
+    deleteButton.setText("Видалити");
   }
 
   private void setTextFields() {
@@ -119,7 +124,7 @@ public class ShotAnalytics extends Application {
   private void setGridPaneElements(GridPane gridPane) {
     gridPane.setHgap(10);
     gridPane.setVgap(10);
-    gridPane.setPadding(new Insets(10));
+    gridPane.setPadding(new Insets(10,10,10,10));
     gridPane.add(new Label("Date:"), 0, 0);
     gridPane.add(datePicker, 1, 0);
     gridPane.add(positionLabel, 0, 1);
@@ -135,8 +140,12 @@ public class ShotAnalytics extends Application {
     gridPane.add(endStrafing, 0, 6);
     gridPane.add(endStrafingInput, 1, 6);
 
+    GridPane.setMargin(saveButton, new Insets(0, 20, 0, 0));
+    GridPane.setMargin(updateButton, new Insets(0, 20, 0, 0));
     gridPane.add(saveButton, 0, 7);
-    gridPane.add(showInfo, 1, 7);
+    HBox buttonsBox = new HBox(20); // 20 - падінг між кнопками
+    buttonsBox.getChildren().addAll(updateButton, deleteButton);
+    gridPane.add(buttonsBox, 1, 7);
 
   }
 
