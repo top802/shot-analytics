@@ -43,7 +43,9 @@ public class ShotAnalytics extends Application {
     setTextFields();
     setLabels();
 
-    saveCard();
+    saveShellingCard();
+    updateShellingCard();
+    deleteShellingCard();
     GridPane gridPane = new GridPane();
     setGridPaneElements(gridPane);
 
@@ -61,7 +63,9 @@ public class ShotAnalytics extends Application {
     primaryStage.show();
   }
 
-  private void saveCard() {
+
+
+  private void saveShellingCard() {
     saveButton.setOnAction(event -> {
       String date = datePicker.getValue().toString();
       String strafingData = strafingInput.getText();
@@ -75,12 +79,14 @@ public class ShotAnalytics extends Application {
           date,Integer.parseInt(strafingData), Integer.parseInt(numbersCannonadesData),
           startStrafingData, endStrafingData,
           positionData, weaponTypeData);
-
-
       // Виконайте дії зі збереженими даними, наприклад, оновлення графіку
       updateChart(shellingCard);
     });
+  }
+  private void deleteShellingCard() {
+  }
 
+  private void updateShellingCard() {
   }
 
   private void setLabels() {
