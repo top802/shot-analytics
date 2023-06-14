@@ -1,0 +1,13 @@
+CREATE TABLE `shot_analytics`.`analytics` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `date_picker` VARCHAR(45) NOT NULL,
+  `strafing` INT NOT NULL,
+  `numbersCannonades` INT NOT NULL,
+  `startStrafing` VARCHAR(45) NOT NULL,
+  `endStrafing` VARCHAR(45) NOT NULL,
+  `position` VARCHAR(45) NOT NULL,
+  `weapon_type` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC));
+
+INSERT INTO `shot_analytics`.`analytics` (`id`, `date_picker`, `strafing`, `numbersCannonades`, `startStrafing`, `endStrafing`, `position`, `weapon_type`) VALUES ('1', '2023-06-14', '1', '2', '10:00', '10:30', 'Don', 'Arta');
