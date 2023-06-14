@@ -1,9 +1,6 @@
 package top.shot.analytics.shotanalytics;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
@@ -46,19 +43,7 @@ public class ShotAnalytics extends Application {
     setTextFields();
     setLabels();
 
-    saveButton.setOnAction(event -> {
-      String date = datePicker.getValue().toString();
-      String strafingData = strafingInput.getText();
-      Integer numbersCannonadesData = Integer.valueOf(numbersCannonadesInput.getText());
-      startStrafingData = startStrafingInput.getText();
-      String endStrafingData = endStrafingInput.getText();
-      String positionData = positionInput.getText();
-      String weaponTypeData = weaponTypeInput.getText();
-
-      // Виконайте дії зі збереженими даними, наприклад, оновлення графіку
-      updateChart(date, strafingData, numbersCannonadesData, startStrafingData, endStrafingData, positionData, weaponTypeData);
-    });
-    // Додати елементи до сітки
+    saveCard();
     GridPane gridPane = new GridPane();
     setGridPaneElements(gridPane);
 
@@ -74,6 +59,28 @@ public class ShotAnalytics extends Application {
     Scene scene = new Scene(gridPane, 500, 600);
     primaryStage.setScene(scene);
     primaryStage.show();
+  }
+
+  private void saveCard() {
+    saveButton.setOnAction(event -> {
+      String date = datePicker.getValue().toString();
+      String strafingData = strafingInput.getText();
+      String numbersCannonadesData = numbersCannonadesInput.getText();
+      startStrafingData = startStrafingInput.getText();
+      String endStrafingData = endStrafingInput.getText();
+      String positionData = positionInput.getText();
+      String weaponTypeData = weaponTypeInput.getText();
+
+      ShellingCard shellingCard = new ShellingCard(
+          date,Integer.parseInt(strafingData), Integer.parseInt(numbersCannonadesData),
+          startStrafingData, endStrafingData,
+          positionData, weaponTypeData);
+
+
+      // Виконайте дії зі збереженими даними, наприклад, оновлення графіку
+      updateChart(shellingCard);
+    });
+
   }
 
   private void setLabels() {
@@ -127,30 +134,21 @@ public class ShotAnalytics extends Application {
 
   }
 
-  private void updateChart(String date, String strafing, Integer numbersCannonades,
-      String startStrafing, String endStrafing, String position, String weaponType) {
-
-
-    ShellingCard shellingCard = new ShellingCard(
-        date,Integer.parseInt(strafing), numbersCannonades,
-        startStrafing, endStrafing,
-        position, weaponType);
+  private void updateChart(ShellingCard shellingCard) {
     showInfo.setText(shellingCard.toString());
-    
     // збереження в базу даних
-    saveToDataBase(shellingCard);
-
-    // Логіка оновлення графіку на основі отриманих даних
-    // Додайте відповідні дані до графіка
-    buildGraph(date, numbersCannonades);
+    saveShellingCardToDataBase(shellingCard);
+    buildGraph(shellingCard.getDatePicker(), shellingCard.getNumbersCannonades());
   }
 
-  private void saveToDataBase(ShellingCard shellingCard) {
+  private void saveShellingCardToDataBase(ShellingCard shellingCard) {
     DatabaseConnection databaseConnection = new DatabaseConnection();
     Connection connectionToDB = databaseConnection.getDatabaseConnection();
-    String query = "INSERT INTO `shot_analytics`.`analytics` "
+    String query = String.format("INSERT INTO `shot_analytics`.`analytics` "
         + "(`date_picker`, `strafing`, `numbersCannonades`, `startStrafing`, `endStrafing`, `position`, `weapon_type`)"
-        + " VALUES ('2023-06-14', '1', '2', '10:00', '10:30', 'Don', 'Arta')";
+        + " VALUES ('%s', %d, %d, '%s', '%s', '%s', '%s')",shellingCard.getDatePicker(), shellingCard.getStrafing(), shellingCard.getNumbersCannonades(),
+        shellingCard.getStartStrafing(), shellingCard.getEndStrafing(), shellingCard.getPosition(), shellingCard.getWeaponType());
+    System.out.println(query);
     try {
       Statement statement = connectionToDB.createStatement();
       statement.execute(query);
