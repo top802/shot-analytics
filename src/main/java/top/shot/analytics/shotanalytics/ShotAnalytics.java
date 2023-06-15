@@ -19,7 +19,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -45,19 +44,16 @@ public class ShotAnalytics extends Application {
   public void start(Stage primaryStage) {
     primaryStage.setTitle("Картка обстрілку");
 
-    // поля для введення тексту та підписи до них
+    // set inputs fields and labels
     setInputFields();
     setLabels();
 
-    //  CRUD картки з БД
+    //  CRUD operation within DB
     saveShellingCard();
     updateShellingCard();
     deleteShellingCard();
-
-    // Графік для відображення аналітики
-
-
-    setGridPaneElements(primaryStage);
+    //  set element on the scene
+    setScene(primaryStage);
   }
 
 
@@ -76,14 +72,15 @@ public class ShotAnalytics extends Application {
           date,Integer.parseInt(strafingData), Integer.parseInt(numbersCannonadesData),
           startStrafingData, endStrafingData,
           positionData, weaponTypeData);
-      // Виконайте дії зі збереженими даними, наприклад, оновлення графіку
-      updateChart(shellingCard);
+//    set chart
+      setChart(shellingCard);
     });
-  }
-  private void deleteShellingCard() {
   }
 
   private void updateShellingCard() {
+  }
+
+  private void deleteShellingCard() {
   }
 
   private void setLabels() {
@@ -119,11 +116,9 @@ public class ShotAnalytics extends Application {
     datePicker = new DatePicker();
   }
 
-  private void setGridPaneElements(Stage primaryStage) {
+  private void setScene(Stage primaryStage) {
 
-
-
-// Встановлюємо таблицю
+//  crate view tableb
     TableView<ShellingCardInTable> tableView = new TableView<>();
     tableView.setPadding(new Insets(10,10,10,10));
     setTableColumns(tableView);
@@ -191,7 +186,7 @@ public class ShotAnalytics extends Application {
 
   }
 
-  private void updateChart(ShellingCard shellingCard) {
+  private void setChart(ShellingCard shellingCard) {
     // збереження в базу даних
     saveShellingCardToDataBase(shellingCard);
     buildGraph(shellingCard.getDatePicker(), shellingCard.getNumbersCannonades());
