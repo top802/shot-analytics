@@ -5,24 +5,28 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class ShellingCardInTable {
 
-  private SimpleStringProperty date;
-  private SimpleIntegerProperty strafing;
-  private SimpleIntegerProperty numbersCannonades;
-  private SimpleStringProperty startStrafing;
-  private SimpleStringProperty endStrafing;
-  private SimpleStringProperty position;
-  private SimpleStringProperty weaponType;
+  private final SimpleStringProperty date;
+  private final SimpleStringProperty position;
+  private final SimpleStringProperty weaponType;
+  private final SimpleIntegerProperty strafing;
+  private final SimpleIntegerProperty numbersCannonades;
+  private final SimpleStringProperty startStrafing;
+  private final SimpleStringProperty endStrafing;
 
-  public ShellingCardInTable(String date, int strafing, int numbersCannonades, String startStrafing,
-      String endStrafing, String position, String weaponType) {
+
+  public ShellingCardInTable(String date, String position, String weaponType, int strafing, int numbersCannonades, String startStrafing,
+      String endStrafing) {
     this.date = new SimpleStringProperty(date);
+    this.position = new SimpleStringProperty(position);
+    this.weaponType = new SimpleStringProperty(weaponType);
     this.strafing = new SimpleIntegerProperty(strafing);
     this.numbersCannonades = new SimpleIntegerProperty(numbersCannonades);
     this.startStrafing = new SimpleStringProperty(startStrafing);
     this.endStrafing = new SimpleStringProperty(endStrafing);
-    this.position = new SimpleStringProperty(position);
-    this.weaponType = new SimpleStringProperty(weaponType);
+
   }
+
+
 
   public String getDate() {
     return date.get();

@@ -2,6 +2,8 @@ package top.shot.analytics.shotanalytics;
 import java.sql.Connection;
 import java.sql.Statement;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -12,18 +14,24 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import top.shot.analytics.shotanalytics.jpa_manager.DatabaseConnection;
+import top.shot.analytics.shotanalytics.jdbc_manager.DatabaseConnection;
 import top.shot.analytics.shotanalytics.model_dto.ShellingCard;
+import top.shot.analytics.shotanalytics.table.ShellingCardInTable;
 
 public class ShotAnalytics extends Application {
 
   Button saveButton, updateButton, deleteButton;
-  Label showInfo, strafing, numbersCannonades,
+  Label datePickerLabel, strafing, numbersCannonades,
         startStrafing, endStrafing, positionLabel,
         weaponTypeLabel;
   DatePicker datePicker;
@@ -44,11 +52,13 @@ public class ShotAnalytics extends Application {
     setTextFields();
     setLabels();
 
+    //  CRUD картки з БД
     saveShellingCard();
     updateShellingCard();
     deleteShellingCard();
-    GridPane gridPane = new GridPane();
-    setGridPaneElements(gridPane);
+
+
+
 
     // Графік для відображення аналітики
     CategoryAxis xAxis = new CategoryAxis();
@@ -56,12 +66,12 @@ public class ShotAnalytics extends Application {
     yAxis.setLabel(startStrafingData);
     lineChart = new LineChart<>(xAxis, yAxis);
     lineChart.setTitle("Analytics");
-    gridPane.add(lineChart, 0, 8, 2, 1);
 
     // Створення сцени та відображення
-    Scene scene = new Scene(gridPane, 500, 600);
-    primaryStage.setScene(scene);
-    primaryStage.show();
+    GridPane gridPane = new GridPane();
+    gridPane.add(lineChart, 0, 8, 2, 1);
+
+    setGridPaneElements(gridPane, primaryStage);
   }
 
 
@@ -91,6 +101,8 @@ public class ShotAnalytics extends Application {
   }
 
   private void setLabels() {
+    datePickerLabel = new Label();
+    datePickerLabel.setText("Дата");
     positionLabel = new Label();
     positionLabel.setText("Позиція");
     weaponTypeLabel = new Label();
@@ -103,7 +115,6 @@ public class ShotAnalytics extends Application {
     startStrafing.setText("Початок обстрілу:");
     endStrafing = new Label();
     endStrafing.setText("Кінець обстрілу:");
-    showInfo = new Label();
     saveButton = new Button();
     saveButton.setText("Зберегти");
     updateButton = new Button();
@@ -121,11 +132,25 @@ public class ShotAnalytics extends Application {
     endStrafingInput = new TextField();
   }
 
-  private void setGridPaneElements(GridPane gridPane) {
+  private void setGridPaneElements(GridPane gridPane, Stage primaryStage) {
+    BorderPane borderPane = new BorderPane();
+
+
+
+// Встановлюємо таблицю
+    TableView<ShellingCardInTable> tableView = new TableView<>();
+    setTableColumns(tableView);
+
+    ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
+    cardList.add(new ShellingCardInTable("2023-06-11", "Don","Arta",
+        1, 5, "10:30", "10:40"));
+    tableView.setItems(cardList);
+    borderPane.setRight(tableView);
+
     gridPane.setHgap(10);
     gridPane.setVgap(10);
     gridPane.setPadding(new Insets(10,10,10,10));
-    gridPane.add(new Label("Date:"), 0, 0);
+    gridPane.add(datePickerLabel, 0, 0);
     gridPane.add(datePicker, 1, 0);
     gridPane.add(positionLabel, 0, 1);
     gridPane.add(positionInput, 1,1);
@@ -140,17 +165,57 @@ public class ShotAnalytics extends Application {
     gridPane.add(endStrafing, 0, 6);
     gridPane.add(endStrafingInput, 1, 6);
 
-    GridPane.setMargin(saveButton, new Insets(0, 20, 0, 0));
-    GridPane.setMargin(updateButton, new Insets(0, 20, 0, 0));
     gridPane.add(saveButton, 0, 7);
     HBox buttonsBox = new HBox(20); // 20 - падінг між кнопками
     buttonsBox.getChildren().addAll(updateButton, deleteButton);
     gridPane.add(buttonsBox, 1, 7);
+    // Встановлюємо поля вводу у ліву частину
+    VBox inputBox = new VBox(10);
+    inputBox.getChildren().addAll(datePicker, positionLabel, positionInput, weaponTypeLabel, weaponTypeInput,
+        strafing, strafingInput, numbersCannonades, numbersCannonadesInput, startStrafing, startStrafingInput,
+        endStrafing, endStrafingInput, saveButton, updateButton, deleteButton);
+//    inputBox.getChildren().add(gridPane);
+    borderPane.setLeft(inputBox);
+
+    Scene borderScene = new Scene(borderPane, 800, 600); // Встановіть ширину і висоту сцени за потребою
+    Scene gridPaneScene = new Scene(gridPane, 800, 600); // Встановіть ширину і висоту сцени за потребою
+// Встановіть сцену на вашому Stage
+    primaryStage.setScene(borderScene);
+//    primaryStage.setScene(gridPaneScene);
+// Покажіть Stage
+    primaryStage.show();
+
+  }
+
+  private void setTableColumns(TableView<ShellingCardInTable> tableView) {
+    TableColumn<ShellingCardInTable, String> dateColumn = new TableColumn<>("Date");
+    dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+
+    TableColumn<ShellingCardInTable, String> positionColumn = new TableColumn<>("Position");
+    positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
+
+    TableColumn<ShellingCardInTable, String> weaponTypeColumn = new TableColumn<>("WeaponType");
+    weaponTypeColumn.setCellValueFactory(new PropertyValueFactory<>("weaponType"));
+
+    TableColumn<ShellingCardInTable,Integer> strafingColumn = new TableColumn<>("Strafing");
+    strafingColumn.setCellValueFactory(new PropertyValueFactory<>("strafing"));
+
+    TableColumn<ShellingCardInTable,Integer> cannonadesColumn = new TableColumn<>("NumberCannonades");
+    cannonadesColumn.setCellValueFactory(new PropertyValueFactory<>("numbersCannonades"));
+
+    TableColumn<ShellingCardInTable, String> startStrafingColumn = new TableColumn<>("StartStrafing");
+    startStrafingColumn.setCellValueFactory(new PropertyValueFactory<>("startStrafing"));
+
+    TableColumn<ShellingCardInTable, String> endStrafingColumn = new TableColumn<>("EndStrafing");
+    endStrafingColumn.setCellValueFactory(new PropertyValueFactory<>("endStrafing"));
+
+    tableView.getColumns().addAll(
+        dateColumn, positionColumn, weaponTypeColumn,
+        strafingColumn, cannonadesColumn, startStrafingColumn, endStrafingColumn);
 
   }
 
   private void updateChart(ShellingCard shellingCard) {
-    showInfo.setText(shellingCard.toString());
     // збереження в базу даних
     saveShellingCardToDataBase(shellingCard);
     buildGraph(shellingCard.getDatePicker(), shellingCard.getNumbersCannonades());
