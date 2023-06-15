@@ -45,11 +45,8 @@ public class ShotAnalytics extends Application {
   public void start(Stage primaryStage) {
     primaryStage.setTitle("Картка обстрілку");
 
-    // Календар з можливістю вибору дати
-    datePicker = new DatePicker();
-
     // поля для введення тексту та підписи до них
-    setTextFields();
+    setInputFields();
     setLabels();
 
     //  CRUD картки з БД
@@ -57,21 +54,10 @@ public class ShotAnalytics extends Application {
     updateShellingCard();
     deleteShellingCard();
 
-
-
-
     // Графік для відображення аналітики
-    CategoryAxis xAxis = new CategoryAxis();
-    NumberAxis yAxis = new NumberAxis();
-    yAxis.setLabel(startStrafingData);
-    lineChart = new LineChart<>(xAxis, yAxis);
-    lineChart.setTitle("Analytics");
 
-    // Створення сцени та відображення
-    GridPane gridPane = new GridPane();
-    gridPane.add(lineChart, 0, 8, 2, 1);
 
-    setGridPaneElements(gridPane, primaryStage);
+    setGridPaneElements(primaryStage);
   }
 
 
@@ -123,62 +109,52 @@ public class ShotAnalytics extends Application {
     deleteButton.setText("Видалити");
   }
 
-  private void setTextFields() {
+  private void setInputFields() {
     positionInput = new TextField();
     weaponTypeInput = new TextField();
     strafingInput = new TextField();
     numbersCannonadesInput = new TextField();
     startStrafingInput = new TextField();
     endStrafingInput = new TextField();
+    datePicker = new DatePicker();
   }
 
-  private void setGridPaneElements(GridPane gridPane, Stage primaryStage) {
-    BorderPane borderPane = new BorderPane();
+  private void setGridPaneElements(Stage primaryStage) {
 
 
 
 // Встановлюємо таблицю
     TableView<ShellingCardInTable> tableView = new TableView<>();
+    tableView.setPadding(new Insets(10,10,10,10));
     setTableColumns(tableView);
 
     ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
     cardList.add(new ShellingCardInTable("2023-06-11", "Don","Arta",
         1, 5, "10:30", "10:40"));
     tableView.setItems(cardList);
-    borderPane.setRight(tableView);
+    BorderPane tablePane = new BorderPane();
+    tablePane.setRight(tableView);
 
-    gridPane.setHgap(10);
-    gridPane.setVgap(10);
-    gridPane.setPadding(new Insets(10,10,10,10));
-    gridPane.add(datePickerLabel, 0, 0);
-    gridPane.add(datePicker, 1, 0);
-    gridPane.add(positionLabel, 0, 1);
-    gridPane.add(positionInput, 1,1);
-    gridPane.add(weaponTypeLabel, 0,2);
-    gridPane.add(weaponTypeInput, 1,2);
-    gridPane.add(strafing, 0, 3);
-    gridPane.add(strafingInput, 1, 3);
-    gridPane.add(numbersCannonades, 0, 4);
-    gridPane.add(numbersCannonadesInput, 1, 4);
-    gridPane.add(startStrafing, 0, 5);
-    gridPane.add(startStrafingInput, 1, 5);
-    gridPane.add(endStrafing, 0, 6);
-    gridPane.add(endStrafingInput, 1, 6);
-
-    gridPane.add(saveButton, 0, 7);
-    HBox buttonsBox = new HBox(20); // 20 - падінг між кнопками
-    buttonsBox.getChildren().addAll(updateButton, deleteButton);
-    gridPane.add(buttonsBox, 1, 7);
-    // Встановлюємо поля вводу у ліву частину
+    // create horizontal box for 3 buttons
+    HBox buttonsBox = new HBox(20); // 20 - відстань між кнопками
+    buttonsBox.getChildren().addAll(saveButton, updateButton, deleteButton);
+    // Встановлюємо поля вводу у ліву частину: спершу пакуємо в
+    CategoryAxis xAxis = new CategoryAxis();
+    NumberAxis yAxis = new NumberAxis();
+    yAxis.setLabel(startStrafingData);
+    lineChart = new LineChart<>(xAxis, yAxis);
+    lineChart.setTitle("Analytics");
     VBox inputBox = new VBox(10);
-    inputBox.getChildren().addAll(datePicker, positionLabel, positionInput, weaponTypeLabel, weaponTypeInput,
+    inputBox.getChildren().addAll(datePickerLabel, datePicker, positionLabel, positionInput, weaponTypeLabel, weaponTypeInput,
         strafing, strafingInput, numbersCannonades, numbersCannonadesInput, startStrafing, startStrafingInput,
-        endStrafing, endStrafingInput, saveButton, updateButton, deleteButton);
+        endStrafing, endStrafingInput, buttonsBox, lineChart);
+//    , saveButton, updateButton, deleteButton
+    inputBox.setPadding(new Insets(10,10,10,10));
 //    inputBox.getChildren().add(gridPane);
-    borderPane.setLeft(inputBox);
+    tablePane.setLeft(inputBox);
 
-    Scene borderScene = new Scene(borderPane, 800, 600); // Встановіть ширину і висоту сцени за потребою
-    Scene gridPaneScene = new Scene(gridPane, 800, 600); // Встановіть ширину і висоту сцени за потребою
+    Scene borderScene = new Scene(tablePane, 1000, 800); // Встановіть ширину і висоту сцени за потребою
+    // Встановіть ширину і висоту сцени за потребою
 // Встановіть сцену на вашому Stage
     primaryStage.setScene(borderScene);
 //    primaryStage.setScene(gridPaneScene);
