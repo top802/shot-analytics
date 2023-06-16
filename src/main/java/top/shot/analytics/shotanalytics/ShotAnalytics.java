@@ -1,5 +1,6 @@
 package top.shot.analytics.shotanalytics;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -24,7 +25,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import top.shot.analytics.shotanalytics.jpa_manager.DatabaseConnection;
+import top.shot.analytics.shotanalytics.jdbc_manager.DatabaseConnection;
 import top.shot.analytics.shotanalytics.model_dto.ShellingCard;
 import top.shot.analytics.shotanalytics.model_dto.ShellingCardInTable;
 
@@ -48,14 +49,16 @@ public class ShotAnalytics extends Application {
     setInputFields();
     setLabels();
     //  CRUD operation within DB
-    saveShellingCard();
+    DatabaseConnection databaseConnection = new DatabaseConnection();
+    Connection connection = databaseConnection.getDatabaseConnection();
+    saveShellingCard(connection);
     updateShellingCard();
     deleteShellingCard();
 //      set element on the scene
-    setScene(primaryStage);
+    setScene(primaryStage, connection);
   }
 
-  private void saveShellingCard() {
+  private void saveShellingCard(Connection connection) {
     saveButton.setOnAction(event -> {
       String date = datePicker.getValue().toString();
       String strafingData = strafingInput.getText();
@@ -70,7 +73,7 @@ public class ShotAnalytics extends Application {
           startStrafingData, endStrafingData,
           positionData, weaponTypeData);
 
-      saveShellingCardToDataBase(shellingCard);
+      saveShellingCardToDataBase(shellingCard, connection);
 //    set chart
       setChart(shellingCard);
     });
@@ -115,17 +118,38 @@ public class ShotAnalytics extends Application {
     datePicker = new DatePicker();
   }
 
-  private void setScene(Stage primaryStage) {
+  private void setScene(Stage primaryStage, Connection connection) {
     primaryStage.setTitle("Картка обстрілку");
-
+    System.out.println("here");
 //  crate view table
     TableView<ShellingCardInTable> tableView = new TableView<>();
     tableView.setPadding(new Insets(10,10,10,10));
     setValueToColumns(tableView);
-
     ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
-    cardList.add(new ShellingCardInTable("2023-06-11", "Don","Arta",
-        1, 5, "10:30", "10:40"));
+
+    try(Statement statement = connection.createStatement()){
+
+      ResultSet resultSet = statement.executeQuery("SELECT * FROM analytics;");
+      while (resultSet.next()){
+        ShellingCardInTable shellingCardInTable = new ShellingCardInTable(
+            resultSet.getString("date_picker"),
+            resultSet.getString("position"),
+            resultSet.getString("weapon_type"),
+            resultSet.getInt("strafing"),
+            resultSet.getInt("numbersCannonades"),
+            resultSet.getString("startStrafing"),
+            resultSet.getString("endStrafing")
+            );
+        cardList.add(shellingCardInTable);
+      }
+      String position = resultSet.getString("position");
+      System.out.println("position form DB " + position);
+
+    }catch (Exception exception){
+      exception.getStackTrace();
+    }
+    System.out.println("after createStatement");
+
     tableView.setItems(cardList);
     // create horizontal box for 3 buttons
     HBox buttonsBox = new HBox(20); // 20 - відстань між кнопками
@@ -190,16 +214,15 @@ public class ShotAnalytics extends Application {
     buildGraph(shellingCard.getDatePicker(), shellingCard.getNumbersCannonades());
   }
 
-  private void saveShellingCardToDataBase(ShellingCard shellingCard) {
-    DatabaseConnection databaseConnection = new DatabaseConnection();
-    Connection connectionToDB = databaseConnection.getDatabaseConnection();
+  private void saveShellingCardToDataBase(ShellingCard shellingCard, Connection connection) {
+
     String query = String.format("INSERT INTO `shot_analytics`.`analytics` "
         + "(`date_picker`, `strafing`, `numbersCannonades`, `startStrafing`, `endStrafing`, `position`, `weapon_type`)"
         + " VALUES ('%s', %d, %d, '%s', '%s', '%s', '%s')",shellingCard.getDatePicker(), shellingCard.getStrafing(), shellingCard.getNumbersCannonades(),
         shellingCard.getStartStrafing(), shellingCard.getEndStrafing(), shellingCard.getPosition(), shellingCard.getWeaponType());
     System.out.println(query);
     try {
-      Statement statement = connectionToDB.createStatement();
+      Statement statement = connection.createStatement();
       statement.execute(query);
       statement.close();
 
