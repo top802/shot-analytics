@@ -41,8 +41,9 @@ public class ShotAnalytics extends Application {
           startStrafingInput, endStrafingInput, positionInput,
           weaponTypeInput;
   private LineChart<String, Number> lineChart;
-  private String startStrafingData;
   private TableView<ShellingCardInTable> tableView;
+  private String startStrafingData;
+  private int id, rowIndex;
 
   @Override
   public void start(Stage primaryStage) {
@@ -53,8 +54,8 @@ public class ShotAnalytics extends Application {
     DatabaseConnection databaseConnection = new DatabaseConnection();
     Connection connection = databaseConnection.getDatabaseConnection();
     saveShellingCard(connection);
-    updateShellingCard();
-    deleteShellingCard();
+    updateShellingCard(connection);
+    deleteShellingCard(connection);
 //      set element on the scene
     setScene(primaryStage, connection);
   }
@@ -80,10 +81,22 @@ public class ShotAnalytics extends Application {
     });
   }
 
-  private void updateShellingCard() {
+  private void updateShellingCard(Connection connection) {
+
   }
 
-  private void deleteShellingCard() {
+  private void deleteShellingCard(Connection connection) {
+    deleteButton.setOnAction(event -> {
+      rowIndex = tableView.getSelectionModel().getSelectedIndex();
+      id = Integer.parseInt(String.valueOf(tableView.getItems().get(rowIndex).getId()));
+      try(Statement statement = connection.createStatement()){
+        String query = String.format("DELETE FROM `shot_analytics`.`analytics` WHERE (`id` = '%s');", id);
+        statement.executeUpdate(query);
+        showTable(connection);
+      }catch (Exception exception){
+        exception.getStackTrace();
+      }
+    });
 
   }
 
@@ -215,6 +228,7 @@ public class ShotAnalytics extends Application {
       ResultSet resultSet = statement.executeQuery("SELECT * FROM analytics;");
       while (resultSet.next()){
         ShellingCardInTable shellingCardInTable = new ShellingCardInTable(
+            resultSet.getInt("id"),
             resultSet.getString("date_picker"),
             resultSet.getString("position"),
             resultSet.getString("weapon_type"),
