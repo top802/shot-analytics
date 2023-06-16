@@ -1,4 +1,4 @@
-package top.shot.analytics.shotanalytics.table;
+package top.shot.analytics.shotanalytics.model_dto;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;

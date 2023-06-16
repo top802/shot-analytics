@@ -8,6 +8,7 @@ module top.shot.analytics.shotanalytics {
   requires mysql.connector.java;
 
   opens top.shot.analytics.shotanalytics to javafx.fxml;
-  opens top.shot.analytics.shotanalytics.table to javafx.base;
+  opens top.shot.analytics.shotanalytics.model_dto to javafx.base;
+
   exports top.shot.analytics.shotanalytics;
 }

@@ -19,14 +19,14 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import top.shot.analytics.shotanalytics.jdbc_manager.DatabaseConnection;
+
+import top.shot.analytics.shotanalytics.jpa_manager.DatabaseConnection;
 import top.shot.analytics.shotanalytics.model_dto.ShellingCard;
-import top.shot.analytics.shotanalytics.table.ShellingCardInTable;
+import top.shot.analytics.shotanalytics.model_dto.ShellingCardInTable;
 
 
 public class ShotAnalytics extends Application {
@@ -69,6 +69,8 @@ public class ShotAnalytics extends Application {
           date,Integer.parseInt(strafingData), Integer.parseInt(numbersCannonadesData),
           startStrafingData, endStrafingData,
           positionData, weaponTypeData);
+
+      saveShellingCardToDataBase(shellingCard);
 //    set chart
       setChart(shellingCard);
     });
@@ -185,7 +187,6 @@ public class ShotAnalytics extends Application {
 
   private void setChart(ShellingCard shellingCard) {
     // збереження в базу даних
-    saveShellingCardToDataBase(shellingCard);
     buildGraph(shellingCard.getDatePicker(), shellingCard.getNumbersCannonades());
   }
 
