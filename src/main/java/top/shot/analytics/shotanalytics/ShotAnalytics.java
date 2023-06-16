@@ -42,6 +42,7 @@ public class ShotAnalytics extends Application {
           weaponTypeInput;
   private LineChart<String, Number> lineChart;
   private String startStrafingData;
+  private TableView<ShellingCardInTable> tableView;
 
   @Override
   public void start(Stage primaryStage) {
@@ -122,13 +123,12 @@ public class ShotAnalytics extends Application {
     primaryStage.setTitle("Картка обстрілку");
     System.out.println("here");
 //  crate view table
-    TableView<ShellingCardInTable> tableView = new TableView<>();
+    tableView = new TableView<>();
     tableView.setPadding(new Insets(10,10,10,10));
     setValueToColumns(tableView);
     ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
 
     try(Statement statement = connection.createStatement()){
-
       ResultSet resultSet = statement.executeQuery("SELECT * FROM analytics;");
       while (resultSet.next()){
         ShellingCardInTable shellingCardInTable = new ShellingCardInTable(
@@ -142,14 +142,9 @@ public class ShotAnalytics extends Application {
             );
         cardList.add(shellingCardInTable);
       }
-      String position = resultSet.getString("position");
-      System.out.println("position form DB " + position);
-
     }catch (Exception exception){
       exception.getStackTrace();
     }
-    System.out.println("after createStatement");
-
     tableView.setItems(cardList);
     // create horizontal box for 3 buttons
     HBox buttonsBox = new HBox(20); // 20 - відстань між кнопками
@@ -229,6 +224,30 @@ public class ShotAnalytics extends Application {
     }catch (Exception exception){
       exception.getStackTrace();
     }
+    showTable(connection);
+  }
+
+  private void showTable(Connection connection) {
+    ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
+
+    try(Statement statement = connection.createStatement()){
+      ResultSet resultSet = statement.executeQuery("SELECT * FROM analytics;");
+      while (resultSet.next()){
+        ShellingCardInTable shellingCardInTable = new ShellingCardInTable(
+            resultSet.getString("date_picker"),
+            resultSet.getString("position"),
+            resultSet.getString("weapon_type"),
+            resultSet.getInt("strafing"),
+            resultSet.getInt("numbersCannonades"),
+            resultSet.getString("startStrafing"),
+            resultSet.getString("endStrafing")
+        );
+        cardList.add(shellingCardInTable);
+      }
+    }catch (Exception exception){
+      exception.getStackTrace();
+    }
+    tableView.setItems(cardList);
   }
 
   private void buildGraph(String date, Integer numbersCannonades) {
