@@ -14,6 +14,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -27,36 +28,32 @@ import top.shot.analytics.shotanalytics.jdbc_manager.DatabaseConnection;
 import top.shot.analytics.shotanalytics.model_dto.ShellingCard;
 import top.shot.analytics.shotanalytics.table.ShellingCardInTable;
 
+
 public class ShotAnalytics extends Application {
 
-  Button saveButton, updateButton, deleteButton;
-  Label datePickerLabel, strafing, numbersCannonades,
-        startStrafing, endStrafing, positionLabel,
-        weaponTypeLabel;
-  DatePicker datePicker;
-  TextField strafingInput, numbersCannonadesInput,
-      startStrafingInput, endStrafingInput, positionInput,
-      weaponTypeInput;
-  LineChart<String, Number> lineChart;
-  String startStrafingData;
+  private Button saveButton, updateButton, deleteButton;
+  private Label datePickerLabel, strafing, numbersCannonades,
+          startStrafing, endStrafing, positionLabel,
+          weaponTypeLabel;
+  private DatePicker datePicker;
+  private TextField strafingInput, numbersCannonadesInput,
+          startStrafingInput, endStrafingInput, positionInput,
+          weaponTypeInput;
+  private LineChart<String, Number> lineChart;
+  private String startStrafingData;
 
   @Override
   public void start(Stage primaryStage) {
-    primaryStage.setTitle("Картка обстрілку");
-
-    // set inputs fields and labels
+//     set inputs fields and labels
     setInputFields();
     setLabels();
-
     //  CRUD operation within DB
     saveShellingCard();
     updateShellingCard();
     deleteShellingCard();
-    //  set element on the scene
+//      set element on the scene
     setScene(primaryStage);
   }
-
-
 
   private void saveShellingCard() {
     saveButton.setOnAction(event -> {
@@ -117,68 +114,68 @@ public class ShotAnalytics extends Application {
   }
 
   private void setScene(Stage primaryStage) {
+    primaryStage.setTitle("Картка обстрілку");
 
-//  crate view tableb
+//  crate view table
     TableView<ShellingCardInTable> tableView = new TableView<>();
     tableView.setPadding(new Insets(10,10,10,10));
-    setTableColumns(tableView);
+    setValueToColumns(tableView);
 
     ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
     cardList.add(new ShellingCardInTable("2023-06-11", "Don","Arta",
         1, 5, "10:30", "10:40"));
     tableView.setItems(cardList);
-    BorderPane tablePane = new BorderPane();
-    tablePane.setRight(tableView);
-
     // create horizontal box for 3 buttons
     HBox buttonsBox = new HBox(20); // 20 - відстань між кнопками
     buttonsBox.getChildren().addAll(saveButton, updateButton, deleteButton);
-    // Встановлюємо поля вводу у ліву частину: спершу пакуємо в
+//  graph
     CategoryAxis xAxis = new CategoryAxis();
     NumberAxis yAxis = new NumberAxis();
     yAxis.setLabel(startStrafingData);
     lineChart = new LineChart<>(xAxis, yAxis);
     lineChart.setTitle("Analytics");
+
     VBox inputBox = new VBox(10);
+    inputBox.setPadding(new Insets(10,10,10,10));
+
     inputBox.getChildren().addAll(datePickerLabel, datePicker, positionLabel, positionInput, weaponTypeLabel, weaponTypeInput,
         strafing, strafingInput, numbersCannonades, numbersCannonadesInput, startStrafing, startStrafingInput,
         endStrafing, endStrafingInput, buttonsBox, lineChart);
-//    , saveButton, updateButton, deleteButton
-    inputBox.setPadding(new Insets(10,10,10,10));
-//    inputBox.getChildren().add(gridPane);
-    tablePane.setLeft(inputBox);
 
-    Scene borderScene = new Scene(tablePane, 1000, 800); // Встановіть ширину і висоту сцени за потребою
-    // Встановіть ширину і висоту сцени за потребою
-// Встановіть сцену на вашому Stage
-    primaryStage.setScene(borderScene);
-//    primaryStage.setScene(gridPaneScene);
-// Покажіть Stage
+    SplitPane sceneElements = new SplitPane();
+    sceneElements.setDividerPositions(0.5);
+    sceneElements.getItems().addAll(inputBox, tableView);
+
+
+    Scene scene = new Scene(sceneElements, 1400, 700); // Встановіть ширину і висоту сцени за потребою
+    primaryStage.setScene(scene);
     primaryStage.show();
 
   }
 
-  private void setTableColumns(TableView<ShellingCardInTable> tableView) {
+  private void setValueToColumns(TableView<ShellingCardInTable> tableView) {
     TableColumn<ShellingCardInTable, String> dateColumn = new TableColumn<>("Date");
     dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-
+    dateColumn.setPrefWidth(85);
     TableColumn<ShellingCardInTable, String> positionColumn = new TableColumn<>("Position");
     positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
-
+    positionColumn.setPrefWidth(100);
     TableColumn<ShellingCardInTable, String> weaponTypeColumn = new TableColumn<>("WeaponType");
     weaponTypeColumn.setCellValueFactory(new PropertyValueFactory<>("weaponType"));
-
+    weaponTypeColumn.setPrefWidth(100);
     TableColumn<ShellingCardInTable,Integer> strafingColumn = new TableColumn<>("Strafing");
     strafingColumn.setCellValueFactory(new PropertyValueFactory<>("strafing"));
-
+    strafingColumn.setPrefWidth(75);
     TableColumn<ShellingCardInTable,Integer> cannonadesColumn = new TableColumn<>("NumberCannonades");
     cannonadesColumn.setCellValueFactory(new PropertyValueFactory<>("numbersCannonades"));
-
+    cannonadesColumn.setPrefWidth(150);
     TableColumn<ShellingCardInTable, String> startStrafingColumn = new TableColumn<>("StartStrafing");
     startStrafingColumn.setCellValueFactory(new PropertyValueFactory<>("startStrafing"));
-
+    strafingColumn.setPrefWidth(75);
     TableColumn<ShellingCardInTable, String> endStrafingColumn = new TableColumn<>("EndStrafing");
     endStrafingColumn.setCellValueFactory(new PropertyValueFactory<>("endStrafing"));
+    endStrafingColumn.setPrefWidth(75);
+
 
     tableView.getColumns().addAll(
         dateColumn, positionColumn, weaponTypeColumn,
