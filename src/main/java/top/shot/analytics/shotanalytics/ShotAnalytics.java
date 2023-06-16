@@ -62,26 +62,46 @@ public class ShotAnalytics extends Application {
 
   private void saveShellingCard(Connection connection) {
     saveButton.setOnAction(event -> {
-      String date = datePicker.getValue().toString();
-      String strafingData = strafingInput.getText();
-      String numbersCannonadesData = numbersCannonadesInput.getText();
-      startStrafingData = startStrafingInput.getText();
-      String endStrafingData = endStrafingInput.getText();
-      String positionData = positionInput.getText();
-      String weaponTypeData = weaponTypeInput.getText();
-
-      ShellingCard shellingCard = new ShellingCard(
-          date,Integer.parseInt(strafingData), Integer.parseInt(numbersCannonadesData),
-          startStrafingData, endStrafingData,
-          positionData, weaponTypeData);
-
+      var shellingCard = createShellingCard();
       saveShellingCardToDataBase(shellingCard, connection);
-//    set chart
       setChart(shellingCard);
     });
   }
 
+  private ShellingCard createShellingCard() {
+    String date = datePicker.getValue().toString();
+    String strafingData = strafingInput.getText();
+    String numbersCannonadesData = numbersCannonadesInput.getText();
+    startStrafingData = startStrafingInput.getText();
+    String endStrafingData = endStrafingInput.getText();
+    String positionData = positionInput.getText();
+    String weaponTypeData = weaponTypeInput.getText();
+
+    return new ShellingCard(
+        date,Integer.parseInt(strafingData), Integer.parseInt(numbersCannonadesData),
+        startStrafingData, endStrafingData,
+        positionData, weaponTypeData);
+  }
+
   private void updateShellingCard(Connection connection) {
+    updateButton.setOnAction(event -> {
+      rowIndex = tableView.getSelectionModel().getSelectedIndex();
+      id = Integer.parseInt(String.valueOf(tableView.getItems().get(rowIndex).getId()));
+      ShellingCard shellingCard = createShellingCard();
+      String query = String.format("UPDATE `shot_analytics`.`analytics` SET"
+          + " `date_picker` = '%s',`strafing` = '%d', `numbersCannonades` = '%d',"
+          + " `startStrafing` = '%s', `endStrafing` = '%s',"
+          + " `position` = '%s', `weapon_type` = '%s' WHERE (`id` = '%d');",
+          shellingCard.getDatePicker(), shellingCard.getStrafing(), shellingCard.getNumbersCannonades(),
+          shellingCard.getStartStrafing(), shellingCard.getEndStrafing(),
+          shellingCard.getPosition(), shellingCard.getWeaponType(), id);
+      try(Statement statement = connection.createStatement()){
+        statement.executeUpdate(query);
+        showTable(connection);
+      }catch (Exception exception){
+        exception.getStackTrace();
+      }
+    });
 
   }
 
