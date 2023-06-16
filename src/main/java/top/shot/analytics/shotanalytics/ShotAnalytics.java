@@ -84,6 +84,7 @@ public class ShotAnalytics extends Application {
   }
 
   private void deleteShellingCard() {
+
   }
 
   private void setLabels() {
@@ -121,31 +122,11 @@ public class ShotAnalytics extends Application {
 
   private void setScene(Stage primaryStage, Connection connection) {
     primaryStage.setTitle("Картка обстрілку");
-    System.out.println("here");
 //  crate view table
     tableView = new TableView<>();
     tableView.setPadding(new Insets(10,10,10,10));
     setValueToColumns(tableView);
-    ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
-
-    try(Statement statement = connection.createStatement()){
-      ResultSet resultSet = statement.executeQuery("SELECT * FROM analytics;");
-      while (resultSet.next()){
-        ShellingCardInTable shellingCardInTable = new ShellingCardInTable(
-            resultSet.getString("date_picker"),
-            resultSet.getString("position"),
-            resultSet.getString("weapon_type"),
-            resultSet.getInt("strafing"),
-            resultSet.getInt("numbersCannonades"),
-            resultSet.getString("startStrafing"),
-            resultSet.getString("endStrafing")
-            );
-        cardList.add(shellingCardInTable);
-      }
-    }catch (Exception exception){
-      exception.getStackTrace();
-    }
-    tableView.setItems(cardList);
+    showTable(connection);
     // create horizontal box for 3 buttons
     HBox buttonsBox = new HBox(20); // 20 - відстань між кнопками
     buttonsBox.getChildren().addAll(saveButton, updateButton, deleteButton);
@@ -175,27 +156,27 @@ public class ShotAnalytics extends Application {
   }
 
   private void setValueToColumns(TableView<ShellingCardInTable> tableView) {
-    TableColumn<ShellingCardInTable, String> dateColumn = new TableColumn<>("Date");
+    TableColumn<ShellingCardInTable, String> dateColumn = new TableColumn<>("Дата");
     dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-    dateColumn.setPrefWidth(85);
-    TableColumn<ShellingCardInTable, String> positionColumn = new TableColumn<>("Position");
+//    dateColumn.setPrefWidth(85);
+    TableColumn<ShellingCardInTable, String> positionColumn = new TableColumn<>("Позиція");
     positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
-    positionColumn.setPrefWidth(100);
-    TableColumn<ShellingCardInTable, String> weaponTypeColumn = new TableColumn<>("WeaponType");
+//    positionColumn.setPrefWidth(75);
+    TableColumn<ShellingCardInTable, String> weaponTypeColumn = new TableColumn<>("Зброя");
     weaponTypeColumn.setCellValueFactory(new PropertyValueFactory<>("weaponType"));
-    weaponTypeColumn.setPrefWidth(100);
-    TableColumn<ShellingCardInTable,Integer> strafingColumn = new TableColumn<>("Strafing");
+    weaponTypeColumn.setPrefWidth(110);
+    TableColumn<ShellingCardInTable,Integer> strafingColumn = new TableColumn<>("К-ть обстрілів");
     strafingColumn.setCellValueFactory(new PropertyValueFactory<>("strafing"));
-    strafingColumn.setPrefWidth(75);
-    TableColumn<ShellingCardInTable,Integer> cannonadesColumn = new TableColumn<>("NumberCannonades");
+//    strafingColumn.setPrefWidth(100);
+    TableColumn<ShellingCardInTable,Integer> cannonadesColumn = new TableColumn<>("К-ть прильотів");
     cannonadesColumn.setCellValueFactory(new PropertyValueFactory<>("numbersCannonades"));
-    cannonadesColumn.setPrefWidth(150);
-    TableColumn<ShellingCardInTable, String> startStrafingColumn = new TableColumn<>("StartStrafing");
+//    cannonadesColumn.setPrefWidth(75);
+    TableColumn<ShellingCardInTable, String> startStrafingColumn = new TableColumn<>("Початок обстрілу");
     startStrafingColumn.setCellValueFactory(new PropertyValueFactory<>("startStrafing"));
-    strafingColumn.setPrefWidth(75);
-    TableColumn<ShellingCardInTable, String> endStrafingColumn = new TableColumn<>("EndStrafing");
+//    strafingColumn.setPrefWidth(75);
+    TableColumn<ShellingCardInTable, String> endStrafingColumn = new TableColumn<>("Кінець обстрілу");
     endStrafingColumn.setCellValueFactory(new PropertyValueFactory<>("endStrafing"));
-    endStrafingColumn.setPrefWidth(75);
+//    endStrafingColumn.setPrefWidth(75);
 
 
     tableView.getColumns().addAll(
