@@ -2,6 +2,7 @@ package top.shot.analytics.shotanalytics;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.time.LocalDate;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,6 +18,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -230,12 +232,9 @@ public class ShotAnalytics extends Application {
         + " VALUES ('%s', %d, %d, '%s', '%s', '%s', '%s')",shellingCard.getDatePicker(), shellingCard.getStrafing(), shellingCard.getNumbersCannonades(),
         shellingCard.getStartStrafing(), shellingCard.getEndStrafing(), shellingCard.getPosition(), shellingCard.getWeaponType());
     System.out.println(query);
-    try {
-      Statement statement = connection.createStatement();
+    try (Statement statement = connection.createStatement()) {
       statement.execute(query);
-      statement.close();
-
-    }catch (Exception exception){
+    } catch (Exception exception){
       exception.getStackTrace();
     }
     showTable(connection);
@@ -243,7 +242,6 @@ public class ShotAnalytics extends Application {
 
   private void showTable(Connection connection) {
     ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
-
     try(Statement statement = connection.createStatement()){
       ResultSet resultSet = statement.executeQuery("SELECT * FROM analytics;");
       while (resultSet.next()){
@@ -263,6 +261,28 @@ public class ShotAnalytics extends Application {
       exception.getStackTrace();
     }
     tableView.setItems(cardList);
+    tableView.setRowFactory( rowFactory ->{
+      TableRow<ShellingCardInTable> selectRow = new TableRow<>();
+      selectRow.setOnMouseClicked( event -> {
+        if(event.getClickCount() == 1 && !selectRow.isEmpty()){
+          rowIndex = tableView.getSelectionModel().getSelectedIndex();
+          setTextToInputFields(rowIndex);
+        }
+      });
+      return selectRow;
+    });
+    
+  }
+
+  private void setTextToInputFields(int rowIndex) {
+    LocalDate localDate = LocalDate.parse(tableView.getItems().get(rowIndex).getDate());
+    datePicker.setValue(localDate);
+    positionInput.setText(tableView.getItems().get(rowIndex).getPosition());
+    weaponTypeInput.setText(tableView.getItems().get(rowIndex).getPosition());
+    strafingInput.setText(String.valueOf(tableView.getItems().get(rowIndex).getStrafing()));
+    numbersCannonadesInput.setText(String.valueOf(tableView.getItems().get(rowIndex).getNumbersCannonades()));
+    startStrafingInput.setText(tableView.getItems().get(rowIndex).getStartStrafing());
+    endStrafingInput.setText(tableView.getItems().get(rowIndex).getEndStrafing());
   }
 
   private void buildGraph(String date, Integer numbersCannonades) {

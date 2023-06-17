@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class ShellingCardInTable {
 
+  private final SimpleIntegerProperty id;
   private final SimpleStringProperty date;
   private final SimpleStringProperty position;
   private final SimpleStringProperty weaponType;
@@ -14,8 +15,9 @@ public class ShellingCardInTable {
   private final SimpleStringProperty endStrafing;
 
 
-  public ShellingCardInTable(String date, String position, String weaponType, int strafing, int numbersCannonades, String startStrafing,
+  public ShellingCardInTable(int id, String date, String position, String weaponType, int strafing, int numbersCannonades, String startStrafing,
       String endStrafing) {
+    this.id = new SimpleIntegerProperty(id);
     this.date = new SimpleStringProperty(date);
     this.position = new SimpleStringProperty(position);
     this.weaponType = new SimpleStringProperty(weaponType);
@@ -26,7 +28,12 @@ public class ShellingCardInTable {
 
   }
 
+  public int getId() {
+    return id.get();
+  }
 
+
+  public SimpleIntegerProperty idProperty() {return id;}
 
   public String getDate() {
     return date.get();
