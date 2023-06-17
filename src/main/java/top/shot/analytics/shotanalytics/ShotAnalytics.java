@@ -52,14 +52,18 @@ public class ShotAnalytics extends Application {
 //     set inputs fields and labels
     setInputFields();
     setLabels();
-    //  CRUD operation within DB
+
     DatabaseConnection databaseConnection = new DatabaseConnection();
     Connection connection = databaseConnection.getDatabaseConnection();
+    setupDatabaseOperation(connection);
+//      set element on the scene
+    setScene(primaryStage, connection);
+  }
+
+  private void setupDatabaseOperation(Connection connection) {
     saveShellingCard(connection);
     updateShellingCard(connection);
     deleteShellingCard(connection);
-//      set element on the scene
-    setScene(primaryStage, connection);
   }
 
   private void saveShellingCard(Connection connection) {
@@ -160,12 +164,12 @@ public class ShotAnalytics extends Application {
 //  crate view table
     tableView = new TableView<>();
     tableView.setPadding(new Insets(10,10,10,10));
-    setValueToColumns(tableView);
+    setTableColumns(tableView);
     showTable(connection);
     // create horizontal box for 3 buttons
     HBox buttonsBox = new HBox(20); // 20 - відстань між кнопками
     buttonsBox.getChildren().addAll(saveButton, updateButton, deleteButton);
-//  graph
+//  todo create analytics table
     CategoryAxis xAxis = new CategoryAxis();
     NumberAxis yAxis = new NumberAxis();
     yAxis.setLabel(startStrafingData);
@@ -190,7 +194,7 @@ public class ShotAnalytics extends Application {
 
   }
 
-  private void setValueToColumns(TableView<ShellingCardInTable> tableView) {
+  private void setTableColumns(TableView<ShellingCardInTable> tableView) {
     TableColumn<ShellingCardInTable, String> dateColumn = new TableColumn<>("Дата");
     dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 //    dateColumn.setPrefWidth(85);
@@ -278,7 +282,7 @@ public class ShotAnalytics extends Application {
     LocalDate localDate = LocalDate.parse(tableView.getItems().get(rowIndex).getDate());
     datePicker.setValue(localDate);
     positionInput.setText(tableView.getItems().get(rowIndex).getPosition());
-    weaponTypeInput.setText(tableView.getItems().get(rowIndex).getPosition());
+    weaponTypeInput.setText(tableView.getItems().get(rowIndex).getWeaponType());
     strafingInput.setText(String.valueOf(tableView.getItems().get(rowIndex).getStrafing()));
     numbersCannonadesInput.setText(String.valueOf(tableView.getItems().get(rowIndex).getNumbersCannonades()));
     startStrafingInput.setText(tableView.getItems().get(rowIndex).getStartStrafing());
