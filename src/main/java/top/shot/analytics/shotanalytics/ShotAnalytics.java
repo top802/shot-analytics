@@ -56,8 +56,17 @@ public class ShotAnalytics extends Application {
     DatabaseConnection databaseConnection = new DatabaseConnection();
     Connection connection = databaseConnection.getDatabaseConnection();
     setupDatabaseOperation(connection);
+    setupAnalytics(connection);
 //      set element on the scene
     setScene(primaryStage, connection);
+  }
+
+  private void setupAnalytics(Connection connection) {
+    createAnalyticsPerDayForPosition(connection);
+  }
+
+  private void createAnalyticsPerDayForPosition(Connection connection) {
+//    todo create datapicker and textfield and than create query
   }
 
   private void setupDatabaseOperation(Connection connection) {

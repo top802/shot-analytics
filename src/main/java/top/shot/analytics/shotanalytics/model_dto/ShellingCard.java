@@ -21,6 +21,8 @@ public class ShellingCard {
 
   private String endStrafing;
 
+  private String rangeStrafing;
+
   private String position;
 
   private String weaponType;
