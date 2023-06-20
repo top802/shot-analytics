@@ -1,17 +1,14 @@
 package top.shot.analytics.shotanalytics;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.util.Collection;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
@@ -26,7 +23,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -114,7 +110,7 @@ public class ShotAnalytics extends Application {
     analyticsButton.setOnAction( event -> {
       String date = analyticsDate.getValue().toString();
       String position = analyticsPosition.getText();
-      String query = DatabaseQuery.getAnalyticPerDay(date, position);
+      String query = DatabaseQuery.getAnalyticPerDayQuery(date, position);
       try(Statement statement = connection.createStatement()){
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()){
@@ -166,12 +162,8 @@ public class ShotAnalytics extends Application {
       rowIndex = tableView.getSelectionModel().getSelectedIndex();
       id = Integer.parseInt(String.valueOf(tableView.getItems().get(rowIndex).getId()));
       ShellingCard shellingCard = createShellingCard();
-      String query = String.format("UPDATE `shot_analytics`.`analytics` SET"
-          + " `date_picker` = '%s',`strafing` = '%d', `numbersCannonades` = '%d',"
-          + " `startStrafing` = '%s', `endStrafing` = '%s',"
-          + " `position` = '%s', `weapon_type` = '%s' WHERE (`id` = '%d');",
-          shellingCard.getDatePicker(), shellingCard.getStrafing(), shellingCard.getNumbersCannonades(),
-          shellingCard.getStartStrafing(), shellingCard.getEndStrafing(),
+      String query = DatabaseQuery.updateShellingCardQuery(shellingCard.getDatePicker(), shellingCard.getStrafing(),
+          shellingCard.getNumbersCannonades(), shellingCard.getStartStrafing(), shellingCard.getEndStrafing(),
           shellingCard.getPosition(), shellingCard.getWeaponType(), id);
       try(Statement statement = connection.createStatement()){
         statement.executeUpdate(query);
@@ -180,7 +172,6 @@ public class ShotAnalytics extends Application {
         exception.getStackTrace();
       }
     });
-
   }
 
   private void deleteShellingCard(Connection connection) {
@@ -188,7 +179,7 @@ public class ShotAnalytics extends Application {
       rowIndex = tableView.getSelectionModel().getSelectedIndex();
       id = Integer.parseInt(String.valueOf(tableView.getItems().get(rowIndex).getId()));
       try(Statement statement = connection.createStatement()){
-        String query = String.format("DELETE FROM `shot_analytics`.`analytics` WHERE (`id` = '%s');", id);
+        String query = DatabaseQuery.deleteShellingCardQuery(id);
         statement.executeUpdate(query);
         showTable(connection);
       }catch (Exception exception){
@@ -197,8 +188,6 @@ public class ShotAnalytics extends Application {
     });
 
   }
-
-
 
   private void setScene(Stage primaryStage, Connection connection) {
     primaryStage.setTitle("Картка обстрілку");
@@ -247,6 +236,7 @@ public class ShotAnalytics extends Application {
     primaryStage.show();
 
   }
+
   private void setTableColumnsInAnalyticsTable(TableView<ShellingCard> analyticTable) {
   }
 
@@ -286,12 +276,10 @@ public class ShotAnalytics extends Application {
   }
 
   private void saveShellingCardToDataBase(ShellingCard shellingCard, Connection connection) {
-
-    String query = String.format("INSERT INTO `shot_analytics`.`analytics` "
-        + "(`date_picker`, `strafing`, `numbersCannonades`, `startStrafing`, `endStrafing`, `position`, `weapon_type`)"
-        + " VALUES ('%s', %d, %d, '%s', '%s', '%s', '%s')",shellingCard.getDatePicker(), shellingCard.getStrafing(), shellingCard.getNumbersCannonades(),
-        shellingCard.getStartStrafing(), shellingCard.getEndStrafing(), shellingCard.getPosition(), shellingCard.getWeaponType());
-    System.out.println(query);
+    String query = DatabaseQuery.insertShellingCardQuery(shellingCard.getDatePicker(),
+        shellingCard.getPosition(), shellingCard.getWeaponType(),
+        shellingCard.getStrafing(), shellingCard.getNumbersCannonades(),
+        shellingCard.getStartStrafing(), shellingCard.getEndStrafing());
     try (Statement statement = connection.createStatement()) {
       statement.execute(query);
     } catch (Exception exception){
@@ -303,7 +291,8 @@ public class ShotAnalytics extends Application {
   private void showTable(Connection connection) {
     ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
     try(Statement statement = connection.createStatement()){
-      ResultSet resultSet = statement.executeQuery("SELECT * FROM analytics;");
+      String query = DatabaseQuery.getAll();
+      ResultSet resultSet = statement.executeQuery(query);
       while (resultSet.next()){
         ShellingCardInTable shellingCardInTable = new ShellingCardInTable(
             resultSet.getInt("id"),
