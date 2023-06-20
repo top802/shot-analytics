@@ -31,6 +31,7 @@ import javafx.stage.Stage;
 import top.shot.analytics.shotanalytics.db_query.DatabaseQuery;
 import top.shot.analytics.shotanalytics.jdbc_manager.DatabaseConnection;
 import top.shot.analytics.shotanalytics.model_dto.ShellingCard;
+import top.shot.analytics.shotanalytics.model_dto.ShellingCardInAnalytics;
 import top.shot.analytics.shotanalytics.model_dto.ShellingCardInTable;
 
 
@@ -46,7 +47,7 @@ public class ShotAnalytics extends Application {
           weaponTypeInput, analyticsPosition;
   private LineChart<String, Number> lineChart;
   private TableView<ShellingCardInTable> tableView;
-  private TableView<ShellingCard> analyticTable;
+  private TableView<ShellingCardInAnalytics> analyticTable;
   private String startStrafingData;
   private int id, rowIndex;
 
@@ -107,25 +108,30 @@ public class ShotAnalytics extends Application {
   }
 
   private void createAnalyticsPerDayForPosition(Connection connection) {
+    ObservableList<ShellingCardInAnalytics> cardList = FXCollections.observableArrayList();
     analyticsButton.setOnAction( event -> {
       String date = analyticsDate.getValue().toString();
       String position = analyticsPosition.getText();
+      cardList.clear();
       String query = DatabaseQuery.getAnalyticPerDayQuery(date, position);
       try(Statement statement = connection.createStatement()){
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()){
-          String positionDB = resultSet.getString("position");
-          System.out.println(positionDB);
+          ShellingCardInAnalytics shellingCardInAnalytics = new ShellingCardInAnalytics(
+              resultSet.getString("date_picker"),
+              resultSet.getString("position"),
+              resultSet.getInt("strafing"),
+              resultSet.getInt("numbersCannonades"),
+              resultSet.getString("strafingTime")
+          );
+          cardList.add(shellingCardInAnalytics);
         }
-
-
       } catch (SQLException exception){
         System.out.println("ERROR");
         exception.getStackTrace();
       }
+      analyticTable.setItems(cardList);
     });
-
-//    todo create datapicker and textfield and than create query
   }
 
   private void setupDatabaseOperation(Connection connection) {
@@ -199,13 +205,10 @@ public class ShotAnalytics extends Application {
     // create horizontal box for 3 buttons
     HBox buttonsBox = new HBox(20); // 20 - відстань між кнопками
     buttonsBox.getChildren().addAll(saveButton, updateButton, deleteButton);
-//  todo create HBox for analytics elements
-
-//  todo create analytics table
     analyticTable = new TableView<>();
     analyticTable.setPadding(new Insets(5,5,5,5));
-    setTableColumnsInAnalyticsTable(analyticTable);
-// todo delete one day
+    setColumnsInAnalyticsTable(analyticTable);
+// todo delete graph one day
     CategoryAxis xAxis = new CategoryAxis();
     NumberAxis yAxis = new NumberAxis();
     yAxis.setLabel(startStrafingData);
@@ -237,7 +240,25 @@ public class ShotAnalytics extends Application {
 
   }
 
-  private void setTableColumnsInAnalyticsTable(TableView<ShellingCard> analyticTable) {
+  private void setColumnsInAnalyticsTable(TableView<ShellingCardInAnalytics> analyticTable) {
+    TableColumn<ShellingCardInAnalytics, String> dateColumn = new TableColumn<>("Дата");
+    dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+//    dateColumn.setPrefWidth(85);
+    TableColumn<ShellingCardInAnalytics, String> positionColumn = new TableColumn<>("Позиція");
+    positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
+//    positionColumn.setPrefWidth(75);
+//    TableColumn<ShellingCardInTable, String> weaponTypeColumn = new TableColumn<>("Зброя");
+//    weaponTypeColumn.setCellValueFactory(new PropertyValueFactory<>("weaponType"));
+//    weaponTypeColumn.setPrefWidth(110);
+    TableColumn<ShellingCardInAnalytics,Integer> strafingColumn = new TableColumn<>("К-ть обстрілів");
+    strafingColumn.setCellValueFactory(new PropertyValueFactory<>("strafing"));
+//    strafingColumn.setPrefWidth(100);
+    TableColumn<ShellingCardInAnalytics,Integer> cannonadesColumn = new TableColumn<>("К-ть прильотів");
+    cannonadesColumn.setCellValueFactory(new PropertyValueFactory<>("numbersCannonades"));
+//    cannonadesColumn.setPrefWidth(75);
+    TableColumn<ShellingCardInAnalytics, String> startStrafingColumn = new TableColumn<>("Час обстрілу");
+    startStrafingColumn.setCellValueFactory(new PropertyValueFactory<>("strafingTime"));
+    analyticTable.getColumns().addAll(dateColumn, positionColumn, strafingColumn, cannonadesColumn, startStrafingColumn);
   }
 
   private void setTableColumns(TableView<ShellingCardInTable> tableView) {

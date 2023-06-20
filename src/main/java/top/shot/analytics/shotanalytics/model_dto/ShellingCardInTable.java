@@ -15,8 +15,9 @@ public class ShellingCardInTable {
   private final SimpleStringProperty endStrafing;
 
 
-  public ShellingCardInTable(int id, String date, String position, String weaponType, int strafing, int numbersCannonades, String startStrafing,
-      String endStrafing) {
+  public ShellingCardInTable(int id, String date, String position, String weaponType,
+      int strafing, int numbersCannonades,
+      String startStrafing, String endStrafing) {
     this.id = new SimpleIntegerProperty(id);
     this.date = new SimpleStringProperty(date);
     this.position = new SimpleStringProperty(position);
