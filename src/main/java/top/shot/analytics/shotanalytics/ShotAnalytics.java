@@ -8,12 +8,7 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -24,7 +19,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -37,15 +31,15 @@ import top.shot.analytics.shotanalytics.model_dto.ShellingCardInTable;
 
 public class ShotAnalytics extends Application {
 
-  private Button saveButton, updateButton, deleteButton, analyticsButton;
+  private Button saveButton, updateButton, deleteButton,
+          oneDayAnalyticsButton, allDaysAnalyticsButton, allPositionAnalyticsForDayButton;
   private Label datePickerLabel, strafing, numbersCannonades,
           startStrafing, endStrafing, positionLabel,
-          weaponTypeLabel, positionAnalyticsLabel, dateAnalyticsLabel;
+          weaponTypeLabel, positionAnalyticsLabel, firstDayLabel, lastDayLabel;
   private DatePicker datePicker, selectFirstDay, selectLastDay;
   private TextField strafingInput, numbersCannonadesInput,
           startStrafingInput, endStrafingInput, positionInput,
           weaponTypeInput, analyticsPosition;
-  private LineChart<String, Number> lineChart;
   private TableView<ShellingCardInTable> shellingCardsTable;
   private TableView<ShellingCardInAnalytics> analyticTable;
   private String startStrafingData;
@@ -64,12 +58,15 @@ public class ShotAnalytics extends Application {
 //      set element on the scene
     setScene(primaryStage, connection);
   }
+
+
   private void setLabels() {
     datePickerLabel = new Label();
-    datePickerLabel.setText("Дата");
+    datePickerLabel.setText("Дата обстрілу");
     positionLabel = new Label();
     positionLabel.setText("Позиція");
-    dateAnalyticsLabel = new Label("Дата");
+    firstDayLabel = new Label("Перший день");
+    lastDayLabel = new Label("Останній день");
     positionAnalyticsLabel = new Label("Позиція");
     weaponTypeLabel = new Label();
     weaponTypeLabel.setText("Тип озброєння");
@@ -83,7 +80,10 @@ public class ShotAnalytics extends Application {
     endStrafing.setText("Кінець обстрілу:");
     saveButton = new Button();
     saveButton.setText("Зберегти");
-    analyticsButton = new Button("аналітика");
+    oneDayAnalyticsButton = new Button("аналітика за 1 день");
+    allDaysAnalyticsButton = new Button("аналітика за вибрані дні");
+    allPositionAnalyticsForDayButton = new Button("аналітика для всіх за 1 день");
+
     updateButton = new Button();
     updateButton.setText("Оновити");
     deleteButton = new Button();
@@ -100,6 +100,7 @@ public class ShotAnalytics extends Application {
     endStrafingInput = new TextField();
     datePicker = new DatePicker();
     selectFirstDay = new DatePicker();
+    selectLastDay = new DatePicker();
     analyticsPosition = new TextField();
   }
 
@@ -113,7 +114,7 @@ public class ShotAnalytics extends Application {
 
   private void createAnalyticsForPositionPerDay(Connection connection) {
     ObservableList<ShellingCardInAnalytics> cardList = FXCollections.observableArrayList();
-    analyticsButton.setOnAction( event -> {
+    oneDayAnalyticsButton.setOnAction( event -> {
       String date = selectFirstDay.getValue().toString();
       String position = analyticsPosition.getText();
       cardList.clear();
@@ -148,7 +149,6 @@ public class ShotAnalytics extends Application {
     saveButton.setOnAction(event -> {
       var shellingCard = createShellingCard();
       saveShellingCardToDataBase(shellingCard, connection);
-      setChart(shellingCard);
     });
   }
 
@@ -218,29 +218,27 @@ public class ShotAnalytics extends Application {
     VBox tablesBox = new VBox(10);
     tablesBox.getChildren().addAll(shellingCardsTableLabel, shellingCardsTable,
                                   analyticTableLabel, analyticTable);
-// todo delete graph one day
-    CategoryAxis xAxis = new CategoryAxis();
-    NumberAxis yAxis = new NumberAxis();
-    yAxis.setLabel(startStrafingData);
-    lineChart = new LineChart<>(xAxis, yAxis);
-    lineChart.setTitle("Analytics");
-
+//  todo add new button for another analytics
     VBox inputBox = new VBox(10);
     inputBox.setPadding(new Insets(10,10,10,10));
-//  todo need change UI
-    HBox analyticInputBox = new HBox(5);
-    analyticInputBox.getChildren().addAll(selectFirstDay, analyticsPosition, analyticsButton);
+    VBox firstDayBox = new VBox(5);
+    firstDayBox.getChildren().addAll(firstDayLabel, selectFirstDay);
+    VBox lastDayBox = new VBox(5);
+    lastDayBox.getChildren().addAll(lastDayLabel, selectLastDay);
 
-    HBox analyticLabelBox = new HBox(5);
-    analyticLabelBox.getChildren().addAll(dateAnalyticsLabel, positionAnalyticsLabel);
-    VBox analyticsBox = new VBox(5);
-    analyticsBox.getChildren().addAll(analyticLabelBox, analyticInputBox);
+    VBox inputPositionBox = new VBox(5);
+    inputPositionBox.getChildren().addAll(positionAnalyticsLabel, analyticsPosition);
+
+    HBox analyticsBox = new HBox(5);
+    analyticsBox.getChildren().addAll(firstDayBox, lastDayBox, inputPositionBox);
+    HBox analyticsButtonsBox = new HBox(5);
+    analyticsButtonsBox.getChildren().addAll(oneDayAnalyticsButton, allDaysAnalyticsButton, allPositionAnalyticsForDayButton);
     inputBox.getChildren().addAll(datePickerLabel, datePicker, positionLabel, positionInput, weaponTypeLabel, weaponTypeInput,
         strafing, strafingInput, numbersCannonades, numbersCannonadesInput, startStrafing, startStrafingInput,
-        endStrafing, endStrafingInput, buttonsBox, analyticsBox);
+        endStrafing, endStrafingInput, buttonsBox, analyticsBox, analyticsButtonsBox);
 
     SplitPane sceneElements = new SplitPane();
-    sceneElements.setDividerPositions(0.5);
+    sceneElements.setDividerPositions(0.49);
     sceneElements.getItems().addAll(inputBox, tablesBox);
 
 
@@ -295,16 +293,10 @@ public class ShotAnalytics extends Application {
     endStrafingColumn.setCellValueFactory(new PropertyValueFactory<>("endStrafing"));
 //    endStrafingColumn.setPrefWidth(75);
 
-
     tableView.getColumns().addAll(
         dateColumn, positionColumn, weaponTypeColumn,
         strafingColumn, cannonadesColumn, startStrafingColumn, endStrafingColumn);
 
-  }
-
-  private void setChart(ShellingCard shellingCard) {
-    // збереження в базу даних
-    buildGraph(shellingCard.getDatePicker(), shellingCard.getNumbersCannonades());
   }
 
   private void saveShellingCardToDataBase(ShellingCard shellingCard, Connection connection) {
@@ -366,41 +358,7 @@ public class ShotAnalytics extends Application {
     endStrafingInput.setText(shellingCardsTable.getItems().get(rowIndex).getEndStrafing());
   }
 
-  private void buildGraph(String date, Integer numbersCannonades) {
-    XYChart.Series<String, Number> series = new XYChart.Series<>();
-    series.getData().add(new XYChart.Data<>(date, numbersCannonades));
-    series.getData().add(new XYChart.Data<>(date, numbersCannonades));
-    series.getData().add(new XYChart.Data<>(date, numbersCannonades));
-    series.getData().add(new XYChart.Data<>(date, numbersCannonades));
-
-    // Додавання підпису для кожної точки
-    for (XYChart.Data<String, Number> data : series.getData()) {
-      data.setNode(new HoveredThresholdNode(data.getYValue().toString()));
-    }
-    lineChart.getData().clear();
-    lineChart.getData().add(series);
-  }
-
   public static void main(String[] args) {
     launch(args);
-  }
-  static class HoveredThresholdNode extends StackPane {
-    public HoveredThresholdNode(String valueY) {
-      setPrefSize(10, 10);
-
-      final Label label = createDataThresholdLabel(valueY);
-
-      getChildren().setAll(label);
-      setCursor(Cursor.NONE);
-    }
-
-    private Label createDataThresholdLabel(String valueY) {
-      final Label label = new Label(valueY);
-      label.getStyleClass().addAll("default-color0", "chart-line-symbol", "chart-series-line");
-      label.setStyle("-fx-font-size: 12; -fx-font-weight: bold;");
-
-      label.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
-      return label;
-    }
   }
 }
