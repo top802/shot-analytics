@@ -106,8 +106,10 @@ public class ShotAnalytics extends Application {
 
   private void setupAnalytics(Connection connection) {
     createAnalyticsForPositionPerDay(connection);
+    createAnalyticsForAllPositionsPerDay(connection);
     createAnalyticsForPositionByDays(connection);
   }
+
 
   private void createAnalyticsForPositionByDays(Connection connection) {
   }
@@ -118,7 +120,7 @@ public class ShotAnalytics extends Application {
       String date = selectFirstDay.getValue().toString();
       String position = analyticsPosition.getText();
       cardList.clear();
-      String query = DatabaseQuery.getAnalyticPerDayQuery(date, position);
+      String query = DatabaseQuery.getQueryAnalyticPerDayForOnePosition(date, position);
       try(Statement statement = connection.createStatement()){
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()){
@@ -138,6 +140,33 @@ public class ShotAnalytics extends Application {
       analyticTable.setItems(cardList);
     });
   }
+
+  private void createAnalyticsForAllPositionsPerDay(Connection connection) {
+    ObservableList<ShellingCardInAnalytics> cardList = FXCollections.observableArrayList();
+    allPositionAnalyticsForDayButton.setOnAction( event -> {
+      String date = selectFirstDay.getValue().toString();
+      cardList.clear();
+      String query = DatabaseQuery.getQueryAnalyticPerDaysForALLPositions(date);
+      try(Statement statement = connection.createStatement()){
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()){
+          ShellingCardInAnalytics shellingCardInAnalytics = new ShellingCardInAnalytics(
+              resultSet.getString("date_picker"),
+              resultSet.getString("position"),
+              resultSet.getInt("strafing"),
+              resultSet.getInt("numbersCannonades"),
+              resultSet.getString("strafingTime")
+          );
+          cardList.add(shellingCardInAnalytics);
+        }
+      } catch (SQLException exception){
+        System.out.println("ERROR");
+        exception.getStackTrace();
+      }
+      analyticTable.setItems(cardList);
+    });
+  }
+
 
   private void setupDatabaseOperation(Connection connection) {
     saveShellingCard(connection);
