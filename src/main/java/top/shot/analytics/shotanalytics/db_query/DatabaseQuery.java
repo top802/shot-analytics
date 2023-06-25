@@ -57,6 +57,16 @@ public class DatabaseQuery {
     return query;
   }
 
+  public static String getQueryAnalyticBetweenDaysForAllPositions(String firstDay, String lastDay){
+    String query = "SELECT date_picker, position,"
+        + " CONCAT(TIME_FORMAT(MIN(startStrafing), '%H:%i'),' - ', TIME_FORMAT(DATE_ADD(MIN(startStrafing), INTERVAL 1 HOUR), '%H:%i'))"
+        + " AS strafingTime, SUM(strafing) AS strafing, SUM(numbersCannonades) AS numbersCannonades"
+        + " FROM `shot_analytics`.`analytics` WHERE"
+        + " date_picker BETWEEN '"+firstDay+"' AND '"+lastDay+"'"
+        + " GROUP BY date_picker, position, HOUR (startStrafing)"
+        + " ORDER BY date_picker, position, HOUR (startStrafing)";
+    return query;
+  }
   public static String deleteShellingCardQuery(int id) {
     String query = String.format("DELETE FROM `shot_analytics`.`analytics` WHERE (`id` = '%s');", id);
     return  query;
