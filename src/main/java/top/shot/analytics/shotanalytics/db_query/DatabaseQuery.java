@@ -35,6 +35,7 @@ public class DatabaseQuery {
         + " ORDER BY date_picker, position, HOUR (startStrafing)";
     return query;
   }
+
   public static String getQueryAnalyticPerDaysForALLPositions(String date){
     String query = "SELECT date_picker, position,"
         + " CONCAT(TIME_FORMAT(MIN(startStrafing), '%H:%i'),' - ', TIME_FORMAT(DATE_ADD(MIN(startStrafing), INTERVAL 1 HOUR), '%H:%i'))"
@@ -44,6 +45,18 @@ public class DatabaseQuery {
         + " ORDER BY date_picker, position, HOUR (startStrafing)";
     return query;
   }
+
+  public static String getQueryAnalyticBetweenDaysForOnePosition(String firstDay, String lastDay, String position){
+    String query = "SELECT date_picker, position,"
+        + " CONCAT(TIME_FORMAT(MIN(startStrafing), '%H:%i'),' - ', TIME_FORMAT(DATE_ADD(MIN(startStrafing), INTERVAL 1 HOUR), '%H:%i'))"
+        + " AS strafingTime, SUM(strafing) AS strafing, SUM(numbersCannonades) AS numbersCannonades"
+        + " FROM `shot_analytics`.`analytics` WHERE"
+        + " date_picker BETWEEN '"+firstDay+"' AND '"+lastDay+"' AND position = '"+position+"'"
+        + " GROUP BY date_picker, position, HOUR (startStrafing)"
+        + " ORDER BY date_picker, position, HOUR (startStrafing)";
+    return query;
+  }
+
   public static String deleteShellingCardQuery(int id) {
     String query = String.format("DELETE FROM `shot_analytics`.`analytics` WHERE (`id` = '%s');", id);
     return  query;

@@ -32,7 +32,7 @@ import top.shot.analytics.shotanalytics.model_dto.ShellingCardInTable;
 public class ShotAnalytics extends Application {
 
   private Button saveButton, updateButton, deleteButton,
-          oneDayAnalyticsButton, allDaysAnalyticsButton, allPositionAnalyticsForDayButton;
+          oneDayAnalyticsButton, analyticsForSelectedDayButton, allPositionAnalyticsForDayButton;
   private Label datePickerLabel, strafing, numbersCannonades,
           startStrafing, endStrafing, positionLabel,
           weaponTypeLabel, positionAnalyticsLabel, firstDayLabel, lastDayLabel;
@@ -81,7 +81,7 @@ public class ShotAnalytics extends Application {
     saveButton = new Button();
     saveButton.setText("Зберегти");
     oneDayAnalyticsButton = new Button("аналітика за 1 день");
-    allDaysAnalyticsButton = new Button("аналітика за вибрані дні");
+    analyticsForSelectedDayButton = new Button("аналітика за вибрані дні");
     allPositionAnalyticsForDayButton = new Button("аналітика для всіх за 1 день");
 
     updateButton = new Button();
@@ -107,11 +107,36 @@ public class ShotAnalytics extends Application {
   private void setupAnalytics(Connection connection) {
     createAnalyticsForPositionPerDay(connection);
     createAnalyticsForAllPositionsPerDay(connection);
-    createAnalyticsForPositionByDays(connection);
+    createAnalyticsForSelectedDaysForPosition(connection);
   }
 
 
-  private void createAnalyticsForPositionByDays(Connection connection) {
+  private void createAnalyticsForSelectedDaysForPosition(Connection connection) {
+    ObservableList<ShellingCardInAnalytics> cardList = FXCollections.observableArrayList();
+    analyticsForSelectedDayButton.setOnAction( event -> {
+      String firstDay = selectFirstDay.getValue().toString();
+      String lastDay = selectLastDay.getValue().toString();
+      String position = analyticsPosition.getText();
+      cardList.clear();
+      String query = DatabaseQuery.getQueryAnalyticBetweenDaysForOnePosition(firstDay, lastDay, position);
+      try(Statement statement = connection.createStatement()){
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()){
+          ShellingCardInAnalytics shellingCardInAnalytics = new ShellingCardInAnalytics(
+              resultSet.getString("date_picker"),
+              resultSet.getString("position"),
+              resultSet.getInt("strafing"),
+              resultSet.getInt("numbersCannonades"),
+              resultSet.getString("strafingTime")
+          );
+          cardList.add(shellingCardInAnalytics);
+        }
+      } catch (SQLException exception){
+        System.out.println("ERROR");
+        exception.getStackTrace();
+      }
+      analyticTable.setItems(cardList);
+    });
   }
 
   private void createAnalyticsForPositionPerDay(Connection connection) {
@@ -261,7 +286,7 @@ public class ShotAnalytics extends Application {
     HBox analyticsBox = new HBox(5);
     analyticsBox.getChildren().addAll(firstDayBox, lastDayBox, inputPositionBox);
     HBox analyticsButtonsBox = new HBox(5);
-    analyticsButtonsBox.getChildren().addAll(oneDayAnalyticsButton, allDaysAnalyticsButton, allPositionAnalyticsForDayButton);
+    analyticsButtonsBox.getChildren().addAll(oneDayAnalyticsButton, analyticsForSelectedDayButton, allPositionAnalyticsForDayButton);
     inputBox.getChildren().addAll(datePickerLabel, datePicker, positionLabel, positionInput, weaponTypeLabel, weaponTypeInput,
         strafing, strafingInput, numbersCannonades, numbersCannonadesInput, startStrafing, startStrafingInput,
         endStrafing, endStrafingInput, buttonsBox, analyticsBox, analyticsButtonsBox);
