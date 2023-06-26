@@ -1,6 +1,45 @@
 package top.shot.analytics.shotanalytics.db_query;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 public class DatabaseQuery {
+
+  public static void createShotAnalyticsDatabase(){
+    String url = "jdbc:sqlite:src/main/resources/shot_analytics.db";
+    String query = createShotAnalyticsTable();
+      try (Connection conn = DriverManager.getConnection(url);
+            Statement statement = conn.createStatement()) {
+      if (conn != null) {
+        statement.executeQuery(query);
+        DatabaseMetaData meta = conn.getMetaData();
+        System.out.println("The driver name is " + meta.getDriverName());
+        System.out.println("A new database has been created.");
+      }
+
+    } catch (SQLException e) {
+        System.out.println("error here");
+      System.out.println(e.getMessage());
+    }
+  }
+
+  private static String createShotAnalyticsTable() {
+    String query = String.format("CREATE TABLE IF NOT EXISTS analytics"
+        + " (id INT(11) AUTO_INCREMENT PRIMARY KEY,"
+        + "  date_picker VARCHAR(25),"
+        + "  position VARCHAR(45),"
+        + "  weapon_type VARCHAR(45),"
+        + "  strafing INT(11),"
+        + "  numbersCannonades INT(11),"
+        + "  startStrafing TIME,"
+        + "  endStrafing TIME);");
+   return query;
+  }
+
+
 
   public static String insertShellingCardQuery(
       String date, String position, String weaponType, int strafing, int numbersCannonades,
@@ -73,6 +112,6 @@ public class DatabaseQuery {
   }
 
   public static String getAll() {
-    return "SELECT * FROM analytics";
+    return "SELECT * FROM `shot_analytics`.`analytics`";
   }
 }

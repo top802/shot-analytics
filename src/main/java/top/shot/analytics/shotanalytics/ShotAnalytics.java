@@ -19,7 +19,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import top.shot.analytics.shotanalytics.db_query.DatabaseQuery;
@@ -32,7 +36,7 @@ import top.shot.analytics.shotanalytics.model_dto.ShellingCardInTable;
 public class ShotAnalytics extends Application {
 
   private Button saveButton, updateButton, deleteButton,
-          oneDayAnalyticsButton, analyticsForSelectedDayButton,
+      onePositionDayAnalyticsButton, analyticsForSelectedDayPositionButton,
           allPositionAnalyticsForDayButton, analyticsForSelectedDaysForAllButton;
   private Label datePickerLabel, strafing, numbersCannonades,
           startStrafing, endStrafing, positionLabel,
@@ -81,8 +85,8 @@ public class ShotAnalytics extends Application {
     endStrafing.setText("Кінець обстрілу:");
     saveButton = new Button();
     saveButton.setText("Зберегти");
-    oneDayAnalyticsButton = new Button("аналітика за 1 день");
-    analyticsForSelectedDayButton = new Button("аналітика за вибрані дні");
+    onePositionDayAnalyticsButton = new Button("аналітика за 1 день");
+    analyticsForSelectedDayPositionButton = new Button("аналітика за вибрані дні");
     analyticsForSelectedDaysForAllButton = new Button("аналітика за вибрані дні для всіх");
     allPositionAnalyticsForDayButton = new Button("аналітика для всіх за 1 день");
 
@@ -115,7 +119,7 @@ public class ShotAnalytics extends Application {
 
   private void createAnalyticsForPositionPerDay(Connection connection) {
     ObservableList<ShellingCardInAnalytics> cardList = FXCollections.observableArrayList();
-    oneDayAnalyticsButton.setOnAction( event -> {
+    onePositionDayAnalyticsButton.setOnAction( event -> {
       String date = selectFirstDay.getValue().toString();
       String position = analyticsPosition.getText();
       cardList.clear();
@@ -168,7 +172,7 @@ public class ShotAnalytics extends Application {
 
   private void createAnalyticsForSelectedDaysForOnePosition(Connection connection) {
     ObservableList<ShellingCardInAnalytics> cardList = FXCollections.observableArrayList();
-    analyticsForSelectedDayButton.setOnAction( event -> {
+    analyticsForSelectedDayPositionButton.setOnAction( event -> {
       String firstDay = selectFirstDay.getValue().toString();
       String lastDay = selectLastDay.getValue().toString();
       String position = analyticsPosition.getText();
@@ -225,6 +229,10 @@ public class ShotAnalytics extends Application {
     saveShellingCard(connection);
     updateShellingCard(connection);
     deleteShellingCard(connection);
+  }
+
+  private void createDataBase() {
+    DatabaseQuery.createShotAnalyticsDatabase();
   }
 
   private void saveShellingCard(Connection connection) {
@@ -290,7 +298,8 @@ public class ShotAnalytics extends Application {
     setTableColumns(shellingCardsTable);
     showTable(connection);
     // create horizontal box for 3 buttons
-    HBox buttonsBox = new HBox(20); // 20 - відстань між кнопками
+    HBox buttonsBox = new HBox(20);
+    buttonsBox.setPadding(new Insets(0, 0, 5, 0));
     buttonsBox.getChildren().addAll(saveButton, updateButton, deleteButton);
     Label analyticTableLabel = new Label("Аналітика обстрілів");
     analyticTableLabel.setPadding(new Insets(0,0,0, 10));
@@ -300,9 +309,9 @@ public class ShotAnalytics extends Application {
     VBox tablesBox = new VBox(10);
     tablesBox.getChildren().addAll(shellingCardsTableLabel, shellingCardsTable,
                                   analyticTableLabel, analyticTable);
-//  todo add new button for another analytics
-    VBox inputBox = new VBox(10);
+    VBox inputBox = new VBox(5);
     inputBox.setPadding(new Insets(10,10,10,10));
+
     VBox firstDayBox = new VBox(5);
     firstDayBox.getChildren().addAll(firstDayLabel, selectFirstDay);
     VBox lastDayBox = new VBox(5);
@@ -311,15 +320,39 @@ public class ShotAnalytics extends Application {
     VBox inputPositionBox = new VBox(5);
     inputPositionBox.getChildren().addAll(positionAnalyticsLabel, analyticsPosition);
 
-    HBox analyticsBox = new HBox(5);
-    analyticsBox.getChildren().addAll(firstDayBox, lastDayBox, inputPositionBox);
+    HBox analyticsInputBox = new HBox(5);
+    analyticsInputBox.getChildren().addAll(firstDayBox, lastDayBox, inputPositionBox);
+
+    Line line = new Line(0, 0, 670, 0); // Горизонтальна лінія
+    line.setStroke(Color.GREY);
+    Line lineBetweenInputBoxAndButtons = new Line(0, 0, 670, 0); // Горизонтальна лінія
+    lineBetweenInputBoxAndButtons.setStroke(Color.GREY);
+    Label buttonsOperations = new Label("Операції з карткою обстрілів:");
+    Rectangle rectangleOnePosition = new Rectangle(220, 125); // Прямокутна рамка
+    rectangleOnePosition.setStroke(Color.BLACK);
+    rectangleOnePosition.setFill(Color.TRANSPARENT);
+    VBox onePositionsButtonsBox = new VBox(10);
+    onePositionsButtonsBox.setPadding(new Insets(10, 10, 10,10));
+    Label onePositionLabel = new Label(
+        "Вибери день, або проміжок днів,\n та вкажи позицію для розрахунку:");
+    onePositionsButtonsBox.getChildren().addAll( onePositionLabel,
+        onePositionDayAnalyticsButton, analyticsForSelectedDayPositionButton);
+    StackPane onePositionBox = new StackPane();
+    onePositionBox.getChildren().addAll(
+        rectangleOnePosition, onePositionsButtonsBox);
+
     HBox analyticsButtonsBox = new HBox(5);
     analyticsButtonsBox.getChildren().addAll(
-        oneDayAnalyticsButton, analyticsForSelectedDayButton,
+        onePositionBox,
         allPositionAnalyticsForDayButton, analyticsForSelectedDaysForAllButton);
-    inputBox.getChildren().addAll(datePickerLabel, datePicker, positionLabel, positionInput, weaponTypeLabel, weaponTypeInput,
-        strafing, strafingInput, numbersCannonades, numbersCannonadesInput, startStrafing, startStrafingInput,
-        endStrafing, endStrafingInput, buttonsBox, analyticsBox, analyticsButtonsBox);
+    Label analyticsLabel = new Label("Побудова аналітики");
+    inputBox.getChildren().addAll(datePickerLabel, datePicker, positionLabel,
+        positionInput, weaponTypeLabel, weaponTypeInput,
+        strafing, strafingInput, numbersCannonades,
+        numbersCannonadesInput, startStrafing, startStrafingInput,
+        endStrafing, endStrafingInput, lineBetweenInputBoxAndButtons, buttonsOperations,
+        buttonsBox, line, analyticsLabel, analyticsInputBox, analyticsButtonsBox);
+
 
     SplitPane sceneElements = new SplitPane();
     sceneElements.setDividerPositions(0.49);
@@ -391,6 +424,8 @@ public class ShotAnalytics extends Application {
     try (Statement statement = connection.createStatement()) {
       statement.execute(query);
     } catch (Exception exception){
+      System.out.println("Error INSERT INTO");
+      System.out.println(exception.getMessage());
       exception.getStackTrace();
     }
     showTable(connection);
@@ -415,6 +450,7 @@ public class ShotAnalytics extends Application {
         cardList.add(shellingCardInTable);
       }
     }catch (Exception exception){
+      System.out.println("Error show table");
       exception.getStackTrace();
     }
     shellingCardsTable.setItems(cardList);
