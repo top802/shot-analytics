@@ -87,7 +87,7 @@ public class ShotAnalytics extends Application {
     saveButton.setText("Зберегти");
     onePositionDayAnalyticsButton = new Button("аналітика за 1 день");
     analyticsForSelectedDayPositionButton = new Button("аналітика за вибрані дні");
-    analyticsForSelectedDaysForAllButton = new Button("аналітика за вибрані дні для всіх");
+    analyticsForSelectedDaysForAllButton = new Button("аналітика  для всіх за вибрані дні");
     allPositionAnalyticsForDayButton = new Button("аналітика для всіх за 1 день");
 
     updateButton = new Button();
@@ -328,23 +328,35 @@ public class ShotAnalytics extends Application {
     Line lineBetweenInputBoxAndButtons = new Line(0, 0, 670, 0); // Горизонтальна лінія
     lineBetweenInputBoxAndButtons.setStroke(Color.GREY);
     Label buttonsOperations = new Label("Операції з карткою обстрілів:");
+
+
     Rectangle rectangleOnePosition = new Rectangle(220, 125); // Прямокутна рамка
-    rectangleOnePosition.setStroke(Color.BLACK);
+    rectangleOnePosition.setStroke(Color.GREY);
     rectangleOnePosition.setFill(Color.TRANSPARENT);
     VBox onePositionsButtonsBox = new VBox(10);
     onePositionsButtonsBox.setPadding(new Insets(10, 10, 10,10));
     Label onePositionLabel = new Label(
-        "Вибери день, або проміжок днів,\n та вкажи позицію для розрахунку:");
+        "Виберіть день, або проміжок днів, \nта вкажи позицію для розрахунку:");
     onePositionsButtonsBox.getChildren().addAll( onePositionLabel,
         onePositionDayAnalyticsButton, analyticsForSelectedDayPositionButton);
     StackPane onePositionBox = new StackPane();
     onePositionBox.getChildren().addAll(
         rectangleOnePosition, onePositionsButtonsBox);
 
-    HBox analyticsButtonsBox = new HBox(5);
-    analyticsButtonsBox.getChildren().addAll(
-        onePositionBox,
+    Rectangle rectangleAllPositions = new Rectangle(220, 125);
+    rectangleAllPositions.setStroke(Color.GREY);
+    rectangleAllPositions.setFill(Color.TRANSPARENT);
+    VBox allPositionsButtonBox = new VBox(10);
+    allPositionsButtonBox.setPadding(new Insets(10,10,10,10));
+    Label allPositionLabel = new Label(
+        "Виберіть день, або проміжок днів, \n для розрахунку:");
+    allPositionsButtonBox.getChildren().addAll(allPositionLabel,
         allPositionAnalyticsForDayButton, analyticsForSelectedDaysForAllButton);
+    StackPane allPositionBox = new StackPane();
+    allPositionBox.getChildren().addAll(rectangleAllPositions, allPositionsButtonBox);
+
+    HBox analyticsButtonsBox = new HBox(5);
+    analyticsButtonsBox.getChildren().addAll(onePositionBox, allPositionBox);
     Label analyticsLabel = new Label("Побудова аналітики");
     inputBox.getChildren().addAll(datePickerLabel, datePicker, positionLabel,
         positionInput, weaponTypeLabel, weaponTypeInput,
