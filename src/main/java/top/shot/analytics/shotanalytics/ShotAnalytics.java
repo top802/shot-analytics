@@ -56,8 +56,10 @@ public class ShotAnalytics extends Application {
     setInputFields();
     setLabels();
 
-    DatabaseConnection databaseConnection = new DatabaseConnection();
-    Connection connection = databaseConnection.getDatabaseConnection();
+//    DatabaseConnection databaseConnection = new DatabaseConnection();
+    Connection connection = DatabaseConnection.getDatabaseConnection();
+//    DatabaseQuery.createShotAnalyticsDatabase(connection);
+    createDataBase(connection);
     setupDatabaseOperation(connection);
     setupAnalytics(connection);
 //      set element on the scene
@@ -137,8 +139,9 @@ public class ShotAnalytics extends Application {
           cardList.add(shellingCardInAnalytics);
         }
       } catch (SQLException exception){
-        System.out.println("ERROR");
+        System.out.println("ERROR createAnalyticsForPositionPerDay");
         exception.getStackTrace();
+        System.out.println(exception.getMessage());
       }
       analyticTable.setItems(cardList);
     });
@@ -191,8 +194,8 @@ public class ShotAnalytics extends Application {
           cardList.add(shellingCardInAnalytics);
         }
       } catch (SQLException exception){
-        System.out.println("ERROR");
-        exception.getStackTrace();
+        System.out.println("ERROR  createAnalyticsForSelectedDaysForOnePosition");
+        System.out.println(exception.getMessage());
       }
       analyticTable.setItems(cardList);
     });
@@ -218,8 +221,8 @@ public class ShotAnalytics extends Application {
           cardList.add(shellingCardInAnalytics);
         }
       } catch (SQLException exception){
-        System.out.println("ERROR");
-        exception.getStackTrace();
+        System.out.println("ERROR   createAnalyticsForSelectedDaysForAllPositions");
+        System.out.println(exception.getMessage());
       }
       analyticTable.setItems(cardList);
     });
@@ -231,8 +234,14 @@ public class ShotAnalytics extends Application {
     deleteShellingCard(connection);
   }
 
-  private void createDataBase() {
-    DatabaseQuery.createShotAnalyticsDatabase();
+  private void createDataBase(Connection connection) {
+    String query = DatabaseQuery.createShotAnalyticsTable();
+    try(var statement = connection.createStatement()){
+      statement.executeUpdate(query);
+    }catch (SQLException exception){
+      System.out.println("ERROR to create table with query");
+      exception.getStackTrace();
+    }
   }
 
   private void saveShellingCard(Connection connection) {
@@ -446,7 +455,7 @@ public class ShotAnalytics extends Application {
   private void showTable(Connection connection) {
     ObservableList<ShellingCardInTable> cardList = FXCollections.observableArrayList();
     try(Statement statement = connection.createStatement()){
-      String query = DatabaseQuery.getAll();
+      String query = DatabaseQuery.getAllShellingCards();
       ResultSet resultSet = statement.executeQuery(query);
       while (resultSet.next()){
         ShellingCardInTable shellingCardInTable = new ShellingCardInTable(
